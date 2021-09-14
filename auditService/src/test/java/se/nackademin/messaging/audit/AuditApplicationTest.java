@@ -68,8 +68,7 @@ class AuditApplicationTest {
 
         rabbitTemplate.convertAndSend("business-events", "" + accountId, new AuditEvent(accountId, data, "OPEN_ACCOUNT", Instant.now().toString()));
 
-        Awaitility.await().atMost(Duration.FIVE_SECONDS).untilAsserted(() -> {
-            final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/audit"))
+        Awaitility.await().atMost(Duration.FIVE_SECONDS).untilAsserted(() -> {final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/audit"))
                     .andExpect(status().isOk())
                     .andReturn();
             final List<AuditEntry> logs = (List<AuditEntry>) mvcResult.getModelAndView().getModel().get("logs");

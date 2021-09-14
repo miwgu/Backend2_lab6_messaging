@@ -55,11 +55,15 @@ class DemoApplicationTests {
     @BeforeEach
     void setUp() {
         rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.declareQueue(new Queue("only-for-test"));
+        rabbitAdmin.declareBinding(new Binding("only-for-test",Binding.DestinationType.QUEUE, "business1", "not-used",null));
+
         // TODO: uppfift 2.a
         // Dags att konfa vår miljö, vi har skapat en exchange men vi behöver en queue så vi kan testa mot
         // Skapa en queue och en binding till den exchange vi skapade uppgift 1
         // Rabbit har ett verktyg som heter RabbitAdmin med bra hjälpmetoder
         // Tex. rabbitAdmin.declareQueue och rabbitAdmin.declareBinding
+
 
     }
 
@@ -67,6 +71,9 @@ class DemoApplicationTests {
     void shouldSendCreatedOnPaymentCreated() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/openAccount/1234")).andExpect(status().is2xxSuccessful());
+        Message message=rabbitTemplate.receive("only-for-test", 4000);//4sekunder är rimligt
+        assertNotNull(message);// Om du klar inte uppgift 3 blir testen fel
+        assertTrue(new String(message.getBody()).contains("OPEN_ACCOUNT"));
         /*
 		TODO: Uppgift 2.b:
             Consume message från din kö du skapade i before.

@@ -3,6 +3,7 @@ package se.nackademin.messaging.audit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,18 +30,25 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    public FanoutExchange fanoutExchange() {
+        return new FanoutExchange("business-events");
+    }
+
+    @Bean
     public Queue myQueue() {
-        return null;
+        return new Queue("audit-log");
     }
 
     @Bean
     public Binding declareBindingGeneric() {
-        return null;
+        return new Binding("audit-log", Binding.DestinationType.QUEUE, "business-events", "dsa", null);
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory, final Jackson2JsonMessageConverter converter) {
-        return null;
+        RabbitTemplate rabbitTemplate=new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(converter);
+        return rabbitTemplate;
     }
 
     @Bean

@@ -14,6 +14,7 @@ public class AuditLogger {
 
     public void notify(Event auditEvent) {
         LOG.info("Sending..");
+        template.convertAndSend("business-events", "dsa", auditEvent);
        /*
        TODO: Uppgift 3:
           Vi är inne i audit loggern. Här är det menat att vi ska skicka iväg ett meddelande!

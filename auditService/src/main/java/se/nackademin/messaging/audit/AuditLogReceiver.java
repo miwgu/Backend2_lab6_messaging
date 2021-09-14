@@ -6,6 +6,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 @Component
 public class AuditLogReceiver {
     private static final Logger LOG = LoggerFactory.getLogger(AuditLogReceiver.class);
@@ -13,8 +15,11 @@ public class AuditLogReceiver {
     @Autowired
     AuditLogRepository auditLogRepository;
 
+    @RabbitListener(queues = "audit-log")
     public void receiveMessage(AuditEvent event) {
         LOG.info("Received message! {}", event);
+       //Business AudittLogger.java->template.convertAndSend("business1", "not-used", auditEvent);
+
         /* TODO: Uppgift 2: Spara eventet!
             För att lyssna på events räcker det med @RabbitListner! Annotera denna metod med:
              @RabbitListener(queues = "audit-log") så kommer den automagiskt att ropas på
@@ -29,5 +34,12 @@ public class AuditLogReceiver {
 
             För att se att allt fungerar kör testet AuditApplicationTest
          */
+        AuditEntry auditEntry = new AuditEntry(
+                AuditEntry.AuditType.valueOf(event.getType()),
+                event.getAccountId(),
+                Instant.parse(event.getTimestamp()),
+                event.getData());
+
+        auditLogRepository.add(auditEntry);
     }
 }

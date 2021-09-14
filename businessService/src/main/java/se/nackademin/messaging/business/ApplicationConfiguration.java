@@ -2,7 +2,7 @@ package se.nackademin.messaging.business;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -38,19 +38,20 @@ public class ApplicationConfiguration {
 	}
      */
 
+
     @Bean
     public AuditLogger auditLogger(RabbitTemplate template) {
         return new AuditLogger(template);
     }
 
     @Bean
-    FanoutExchange exchange() {
-        return null;
-    }
+    FanoutExchange exchange( ) {return new FanoutExchange("business-events");}
 
     @Bean
     public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory, final Jackson2JsonMessageConverter converter) {
-       return null;
+        RabbitTemplate rabbitTemplate=new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(converter);
+        return rabbitTemplate;
     }
 
     @Bean
